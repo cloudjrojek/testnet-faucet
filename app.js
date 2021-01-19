@@ -22,9 +22,9 @@ redis_c.on("error", function(err) {
 // config bitcoin
 var btc_c = new bitcoin.Client({
   host: 'localhost',
-  port: config.bitcoind.port,
-  user: config.bitcoind.username,
-  pass: config.bitcoind.password,
+  port: config.bvaultd.port,
+  user: config.bvaultd.username,
+  pass: config.bvaultd.password,
   timeout: 30000
 });
 
@@ -43,17 +43,20 @@ app.use(function(req, res, next) {
   next();
 });
 
-// 2% of current balance
+// hard cap limit of 1 000 000 satoshi or 2% of total balance
 function getMaxWithdrawal () {
+  var HARD_CAP_LIMIT = 1000000;
   var PERCENTAGE_OF_BAL = .02;
   var promise = new Promise(function(resolve, reject) {
     btc_c.getBalance('*', 1, function(err, balance, resHeaders) {
       if (err) {
+        console.log(err);
         reject(err);
       }
-      resolve(Math.floor(balance.toSatoshi() * PERCENTAGE_OF_BAL));
+      console.log('balance: ' + balance);
+      resolve(Math.min(Math.floor(balance.toSatoshi() * PERCENTAGE_OF_BAL), HARD_CAP_LIMIT));
     });
-  })
+})
   return promise;
 }
 
@@ -64,11 +67,11 @@ function getSavedLimit (ip) {
       // we could connect to redis and make the query
       if (!err) {
         // this IP has visited before, return previously computed limits
-        if (result) {
+        if (result && result != "0") {
           resolve(result);
         } else { 
           // set the limit and return it
-          getMaxWithdrawal().then(function(max) {
+            getMaxWithdrawal().then(function(max) {
             redis_c.set(ip, max);
             redis_c.expire(ip, wait_time);
             resolve(max);
@@ -105,6 +108,7 @@ app.post('/', function(req, res) {
   if (!addr || !sat) {
     res.statusCode = 406;
     console.log(ip + ": ERROR missing params");
+    console.log(req.body);
     return res.end(JSON.stringify({
       error: "Missing required parameters"
     }));

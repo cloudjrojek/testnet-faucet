@@ -3,10 +3,11 @@ Testnet-Faucet API
 
 Simple Testnet Faucet API in Node.js
 
-Requires bitcoind and redis.  Set configuration params in config.js.
+Requires bvaultd with funded wallet and redis.  Set configuration params in config.js.
 
 Each requesting IP is restricted to a limited amount of bitcoins each hour. There are no limits to the number of requests, as long as your IP stays below it's limit.
 
+sudo apt-get install redis-server
 Run - node app.js
 
 POST /
