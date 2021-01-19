@@ -11,8 +11,12 @@ install dependencies: sudo apt-get install redis-server
 
 Run: node app.js
 
+API:
+
+
 POST /
-  {address: "ADDRESS", amount: AMOUNT IN SATOSHIS}
+
+{address: "ADDRESS", amount: AMOUNT IN SATOSHIS}
 
   Responds with:
   {id: "HASH OF TXN", limit: AMOUNT IN SATOSHIS}
@@ -21,8 +25,9 @@ POST /
   {error: "ERROR MESSAGE" }
 
 GET /
-  Responds with:
-  {ip: "YOUR IP", limit: "MAX WITHDRAWAL IN SATOSHIS"}
+
+Responds with:
+{ip: "YOUR IP", limit: "MAX WITHDRAWAL IN SATOSHIS"}
 
 ----
 
